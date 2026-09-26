@@ -5,18 +5,21 @@
  */
 import type { LeadQualification, RedditPost } from "../types.js";
 import { chatJson } from "./client.js";
+import { appConfig } from "../appConfig.js";
 
-const SYSTEM = `You are a B2B software lead qualification agent for Marz Studio, a small custom software development studio.
+function buildSystem(): string {
+  const b = appConfig.business;
+  const services = b.services.join(", ");
+  const SYSTEM_HEAD = `You are a B2B software lead qualification agent for ${b.name}, ${b.description}.
 
-Evaluate whether a Reddit post represents a genuine opportunity to sell custom software development
-(custom software, automation, ERP, CRM, integrations, internal tools, inventory systems, dashboards).
+Evaluate whether a post represents a genuine opportunity to sell ${services}.
 
 Score 0-100 using:
 - Is there a real business behind the post?
 - Is there a real operational/software problem?
 - Is the person actively looking for a developer, vendor, or solution?
 - Is there explicit evidence of willingness to pay? (quote it or say none)
-- What solution could solve it, and could a SMALL studio realistically deliver it?
+- What solution could solve it, and ${b.studioSizeNote}?
 
 CRITICAL HONESTY RULES — NEVER violate these:
 - NEVER invent evidence. If the post does not mention a budget, say so explicitly. Do not claim they have a budget.
@@ -39,6 +42,8 @@ Return ONLY valid JSON with EXACTLY these keys:
   "reason": "short explanation",
   "recommendedAction": "short next step for a human researcher"
 }`;
+  return SYSTEM_HEAD;
+}
 
 function isRecord(v: unknown): v is Record<string, unknown> {
   return typeof v === "object" && v !== null;
@@ -120,7 +125,7 @@ export function postToText(post: RedditPost): string {
 export async function qualifyPost(
   post: RedditPost
 ): Promise<LeadQualification> {
-  const raw = await chatJson(SYSTEM, postToText(post));
+  const raw = await chatJson(buildSystem(), postToText(post));
   return validateQualification(raw);
 }
 
@@ -129,6 +134,6 @@ export async function qualifyText(
   postText: string
 ): Promise<LeadQualification> {
   if (!postText.trim()) throw new Error("qualifyText: empty post");
-  const raw = await chatJson(SYSTEM, postText.slice(0, 4000));
+  const raw = await chatJson(buildSystem(), postText.slice(0, 4000));
   return validateQualification(raw);
 }

@@ -13,10 +13,9 @@
  */
 import type { RedditPost } from "../types.js";
 import { KEYWORDS, SUBREDDITS } from "./reddit.js";
+import { appConfig } from "../appConfig.js";
 
-const USER_AGENT =
-  process.env.REDDIT_USER_AGENT ??
-  "marz-lead-radar/1.0 (read-only lead research; contact: Marz Studio)";
+const USER_AGENT = appConfig.sources.userAgent;
 
 function decodeEntities(s: string): string {
   return s

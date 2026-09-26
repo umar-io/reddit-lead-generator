@@ -5,6 +5,7 @@
 import type { EnrichedLead } from "../types.js";
 import { bucketForScore } from "../types.js";
 import { sendToSlack } from "../lib/slack.js";
+import { appConfig } from "../appConfig.js";
 
 function priorityEmoji(score: number): string {
   const b = bucketForScore(score);
@@ -23,7 +24,7 @@ function safe(s: string, max = 600): string {
 export function formatLeadReport(lead: EnrichedLead): string {
   const { post, qualification: q, conversation, enrichment } = lead;
   const lines: string[] = [];
-  lines.push("🚨 NEW MARZ STUDIO LEAD");
+  lines.push(`🚨 NEW ${appConfig.appName.toUpperCase()} LEAD`);
   lines.push("");
   lines.push(`${priorityEmoji(q.score)} Score: ${q.score}/100`);
   lines.push(`🎯 Buying intent: ${q.buyingIntent.toUpperCase()}`);
@@ -71,10 +72,10 @@ export function formatLeadReport(lead: EnrichedLead): string {
   lines.push("🎯 Recommended next action:");
   lines.push(safe(q.recommendedAction, 400));
   lines.push("");
-  lines.push("💬 Why Marz Studio could potentially help:");
+  lines.push(`💬 Why ${appConfig.business.name} could potentially help:`);
   lines.push(safe(q.reason, 400));
   lines.push("");
-  lines.push(`🔗 Reddit: ${post.url}`);
+  lines.push(`🔗 Source: ${post.url}`);
   lines.push("");
   lines.push("_Lead research report — not an automated sales action._");
   return lines.join("\n");
@@ -85,7 +86,7 @@ export function formatDigest(leads: EnrichedLead[]): string {
   const strong = leads.filter((l) => bucketForScore(l.qualification.score) === "strong").length;
   const worth = leads.filter((l) => bucketForScore(l.qualification.score) === "worth").length;
   const lines: string[] = [];
-  lines.push("MARZ STUDIO — DAILY LEADS");
+  lines.push(`${appConfig.appName.toUpperCase()} — DAILY LEADS`);
   lines.push("");
   lines.push(`🔥 ${strong} strong ${strong === 1 ? "opportunity" : "opportunities"}`);
   lines.push(`🟠 ${worth} worth investigating`);
@@ -112,7 +113,7 @@ export async function sendLeadReport(lead: EnrichedLead): Promise<void> {
 export async function sendDigest(leads: EnrichedLead[]): Promise<void> {
   if (leads.length === 0) {
     await sendToSlack(
-      "MARZ STUDIO — DAILY LEADS\n\nNo qualified leads today (score >= threshold). _Research digest._"
+      `${appConfig.appName.toUpperCase()} — DAILY LEADS\n\nNo qualified leads today (score >= threshold). _Research digest._`
     );
     return;
   }

@@ -8,21 +8,13 @@
  * per run, 1s+ gaps). No scraping of the HTML site.
  */
 import type { RedditComment, RedditPost } from "../types.js";
+import { appConfig } from "../appConfig.js";
 
 const SEARCH_BASE = "https://hn.algolia.com/api/v1/search";
 const ITEM_BASE = "https://hn.algolia.com/api/v1/items";
-const USER_AGENT = "marz-lead-radar/1.0 (read-only lead research)";
+const USER_AGENT = appConfig.sources.userAgent;
 
-export const HN_KEYWORDS = [
-  "looking for developer",
-  "need developer",
-  "custom ERP",
-  "custom software",
-  "inventory software",
-  "internal tool",
-  "need software built",
-  "freelance developer",
-] as const;
+export const HN_KEYWORDS: string[] = appConfig.sources.hnKeywords;
 
 interface HnHit {
   objectID: string;

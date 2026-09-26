@@ -4,3 +4,5 @@ dist/
 .env
 .env.local
 .env.*.local
+lead-radar.config.json
+data/leads.json

@@ -15,39 +15,19 @@
  *  - 429/5xx = back off, not retried aggressively.
  */
 import type { RedditComment, RedditPost } from "../types.js";
+import { appConfig } from "../appConfig.js";
 
-export const SUBREDDITS = [
-  "Shopify",
-  "ecommerce",
-  "InventoryManagement",
-  "3PL",
-  "smallbusiness",
-  "ERP",
-] as const;
+/**
+ * Target subs + keywords come from lead-radar.config.json
+ * (SUBREDDITS / KEYWORDS env vars override). Defaults preserve the
+ * original behavior. Import from appConfig for new code; these
+ * re-exports stay for backward compatibility.
+ */
+export const SUBREDDITS: string[] = appConfig.sources.subreddits;
 
-export const KEYWORDS = [
-  "looking for developer",
-  "need a developer",
-  "looking for someone to build",
-  "custom software",
-  "custom ERP",
-  "build ERP",
-  "internal tool",
-  "inventory system",
-  "inventory software",
-  "warehouse software",
-  "automation",
-  "API integration",
-  "Shopify integration",
-  "CRM",
-  "business management system",
-  "software developer",
-  "need software",
-] as const;
+export const KEYWORDS: string[] = appConfig.sources.keywords;
 
-const USER_AGENT =
-  process.env.REDDIT_USER_AGENT ??
-  "marz-lead-radar/1.0 (read-only lead research; contact: Marz Studio)";
+const USER_AGENT = appConfig.sources.userAgent;
 
 const REQUEST_GAP_MS = 1200;
 let lastRequestAt = 0;

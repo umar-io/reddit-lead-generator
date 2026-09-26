@@ -81,7 +81,8 @@ async function fetchHomepageMeta(
       signal: ctrl.signal,
       headers: {
         "User-Agent":
-          "marz-lead-radar/1.0 (public business research; contact: Marz Studio)",
+          process.env.REDDIT_USER_AGENT ??
+          "lead-radar/1.0 (public business research)",
         Accept: "text/html",
       },
     });

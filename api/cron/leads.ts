@@ -4,8 +4,8 @@ import { runLive } from "../../src/pipeline.js";
 
 /**
  * Vercel Cron — GET /api/cron/leads
- * Runs discovery → qualification → single Slack digest.
- * Read-only on Reddit; only outbound call is the Slack webhook.
+ * Runs discovery → qualification → fan-out to configured outputs.
+ * Read-only on Reddit/HN; outbound calls are output channels only.
  */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== "GET" && req.method !== "POST") {

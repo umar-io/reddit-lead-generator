@@ -2,7 +2,7 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import "../../src/env.js";
 import { config } from "../../src/env.js";
 import { qualifyLead } from "../../src/lib/groq.js";
-import { sendLeadReport } from "../../src/notifications/slack.js";
+import { sendSingleLead } from "../../src/notifications/index.js";
 
 /**
  * Legacy cron route — kept for backward compatibility.
@@ -36,7 +36,7 @@ We're willing to pay for the right solution.`;
     if (qualification.score < config.leadScoreThreshold) {
       return res.status(200).json({ ok: true, skipped: true, lead: qualification });
     }
-    await sendLeadReport({
+    await sendSingleLead({
       post: {
         id: "manual",
         subreddit: "manual",

@@ -1,0 +1,57 @@
+{
+  "$comment": "Copy to lead-radar.config.json and edit. Env vars override everything here. See README + .env.example.",
+  "appName": "Lead Radar",
+  "business": {
+    "name": "your studio",
+    "description": "a small custom software development studio",
+    "services": [
+      "custom software",
+      "automation",
+      "ERP",
+      "CRM",
+      "integrations",
+      "internal tools",
+      "inventory systems",
+      "dashboards"
+    ],
+    "studioSizeNote": "could a SMALL studio realistically deliver it?"
+  },
+  "sources": {
+    "subreddits": ["Shopify", "ecommerce", "InventoryManagement", "3PL", "smallbusiness", "ERP"],
+    "keywords": [
+      "looking for developer",
+      "need a developer",
+      "looking for someone to build",
+      "custom software",
+      "custom ERP",
+      "build ERP",
+      "internal tool",
+      "inventory system",
+      "inventory software",
+      "warehouse software",
+      "automation",
+      "API integration",
+      "Shopify integration",
+      "CRM",
+      "business management system",
+      "software developer",
+      "need software"
+    ],
+    "hnKeywords": [
+      "looking for developer",
+      "need developer",
+      "custom ERP",
+      "custom software",
+      "inventory software",
+      "internal tool",
+      "need software built",
+      "freelance developer"
+    ],
+    "userAgent": "lead-radar/1.0 (read-only lead research)"
+  },
+  "outputs": {
+    "mode": "digest",
+    "channels": ["slack"],
+    "jsonFile": null
+  }
+}

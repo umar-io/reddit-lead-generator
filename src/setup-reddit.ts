@@ -12,6 +12,7 @@
  */
 import "./env.js";
 import { createServer } from "node:http";
+import { appConfig } from "./appConfig.js";
 
 const clientId = process.env.REDDIT_CLIENT_ID;
 const clientSecret = process.env.REDDIT_CLIENT_SECRET;
@@ -25,9 +26,7 @@ if (!clientId || !clientSecret) {
 
 const redirectUri = process.env.REDDIT_REDIRECT_URI ?? "http://localhost:8080";
 const port = Number(new URL(redirectUri).port || 8080);
-const userAgent =
-  process.env.REDDIT_USER_AGENT ??
-  "windows:marz-lead-radar:1.0 (by /u/your-username)";
+const userAgent = process.env.REDDIT_USER_AGENT ?? appConfig.sources.userAgent;
 
 const state = Math.random().toString(36).slice(2);
 const authUrl =

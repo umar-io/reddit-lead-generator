@@ -1,14 +1,17 @@
 /**
- * marz-lead-radar pipeline.
+ * lead-radar pipeline (general use — configure via lead-radar.config.json).
  *
- *   npm run test:lead          → legacy test post through NEW stack → Slack
- *   npm run pipeline:live      → Reddit discovery → qualify → digest → Slack
- *   tsx src/pipeline.ts --live --dry-run --limit 5
+ *   npm run test:lead          → sample post through AI stack → outputs
+ *   npm run pipeline:live      → discovery → qualify → digest → outputs
+ *   tsx src/pipeline.ts --live --dry-run --limit=5
+ *   tsx src/pipeline.ts --live --config=./my-niche.json
  *
- * Read-only on Reddit. The only outbound action is the Slack webhook.
+ * Read-only on Reddit/HN. Outbound actions are output channels only
+ * (slack / discord / webhook / json) — never posts, comments, or DMs.
  */
 import "./env.js";
 import { config } from "./env.js";
+import { appConfig } from "./appConfig.js";
 import { discoverPosts, fetchPostComments } from "./collectors/reddit.js";
 import { discoverViaRss } from "./collectors/redditRss.js";
 import { discoverHn, fetchHnComments } from "./collectors/hackernews.js";
@@ -16,7 +19,7 @@ import { createLeadStore } from "./storage/leads.js";
 import { qualifyPost, qualifyText } from "./ai/qualifier.js";
 import { analyzeConversation } from "./analysis/comments.js";
 import { enrichBusiness } from "./enrichment/business.js";
-import { sendDigest, sendLeadReport } from "./notifications/slack.js";
+import { sendLeads, sendSingleLead } from "./notifications/index.js";
 import type { EnrichedLead, RedditPost } from "./types.js";
 
 const TEST_POST = `
@@ -32,6 +35,7 @@ We're willing to pay for the right solution.
 
 function args(): { live: boolean; dryRun: boolean; limit: number } {
   const a = process.argv.slice(2);
+  // Note: --config= is consumed by appConfig at import time; nothing to do here.
   return {
     live: a.includes("--live"),
     dryRun: a.includes("--dry-run"),
@@ -110,7 +114,7 @@ async function enrichOne(post: RedditPost): Promise<EnrichedLead | null> {
   }
 }
 
-/** Legacy test path — same Groq → Slack flow, now via the new stack. */
+/** Sample-post path — same AI → outputs flow, useful for smoke-testing config. */
 async function runTest(dryRun: boolean): Promise<void> {
   console.log("🔎 Qualifying test lead (legacy test:lead path)...");
   const qualification = await qualifyText(TEST_POST);
@@ -138,11 +142,11 @@ async function runTest(dryRun: boolean): Promise<void> {
     enrichment: null,
   };
   if (dryRun) {
-    console.log("💡 dry-run: Slack send skipped");
+    console.log("💡 dry-run: output send skipped");
     return;
   }
-  await sendLeadReport(lead);
-  console.log("✅ Test lead sent to #marz-studio");
+  await sendSingleLead(lead);
+  console.log(`✅ Test lead sent via ${appConfig.outputs.channels.join(", ")}`);
 }
 
 /** Live path — Reddit → dedupe → qualify → digest. */
@@ -175,15 +179,14 @@ export async function runLive(opts: { dryRun: boolean; limit: number }): Promise
   );
 
   if (opts.dryRun) {
-    console.log("💡 dry-run: Slack digest skipped");
+    console.log("💡 dry-run: output send skipped");
     return qualified;
   }
   if (qualified.length > 0) {
-    // One digest message per run (Phase 9) — no per-post spam.
-    await sendDigest(qualified);
-    console.log("✅ Digest sent to #marz-studio");
+    await sendLeads(qualified);
+    console.log(`✅ Digest sent via ${appConfig.outputs.channels.join(", ")}`);
   } else {
-    console.log("ℹ️ Nothing qualified — no Slack message sent");
+    console.log("ℹ️ Nothing qualified — no output sent");
   }
   return qualified;
 }

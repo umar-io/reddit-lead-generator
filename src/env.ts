@@ -6,15 +6,31 @@ import dotenv from "dotenv";
 dotenv.config({ path: ".env.local" });
 dotenv.config();
 
-const required = ["GROQ_API_KEY", "SLACK_WEBHOOK_URL"] as const;
+const required = ["GROQ_API_KEY"] as const;
 
 for (const key of required) {
   if (!process.env[key]) {
     throw new Error(
       `[env] Missing required environment variable: ${key}. ` +
-        `Check .env.local exists and contains ${key}.`
+        `Copy .env.example to .env.local and fill it in.`
     );
   }
+}
+
+// At least one output channel must be usable. "json" needs no URL —
+// it prints to stdout (or JSON_OUTPUT_FILE when set).
+const hasOutput =
+  process.env.SLACK_WEBHOOK_URL ||
+  process.env.DISCORD_WEBHOOK_URL ||
+  process.env.GENERIC_WEBHOOK_URL ||
+  (process.env.OUTPUT_CHANNELS ?? "slack").split(",").includes("json") ||
+  process.env.JSON_OUTPUT_FILE;
+
+if (!hasOutput) {
+  throw new Error(
+    `[env] No output configured. Set at least one of: SLACK_WEBHOOK_URL, ` +
+      `DISCORD_WEBHOOK_URL, GENERIC_WEBHOOK_URL, or OUTPUT_CHANNELS=json / JSON_OUTPUT_FILE.`
+  );
 }
 
 function intEnv(name: string, fallback: number): number {
@@ -26,10 +42,13 @@ function intEnv(name: string, fallback: number): number {
 
 export const config = {
   groqModel: process.env.GROQ_MODEL ?? "openai/gpt-oss-20b",
-  /** Only send leads >= threshold to Slack by default. */
+  /** Only send leads >= threshold to outputs by default. */
   leadScoreThreshold: intEnv("LEAD_SCORE_THRESHOLD", 70),
   /** Caps per scheduled run to respect Reddit + Groq rate limits. */
   maxPostsPerRun: intEnv("MAX_POSTS_PER_RUN", 12),
   maxCommentsPerPost: intEnv("MAX_COMMENTS_PER_POST", 8),
   redditEnabled: (process.env.REDDIT_ENABLED ?? "true").toLowerCase() === "true",
+  slackWebhookUrl: process.env.SLACK_WEBHOOK_URL ?? null,
+  discordWebhookUrl: process.env.DISCORD_WEBHOOK_URL ?? null,
+  genericWebhookUrl: process.env.GENERIC_WEBHOOK_URL ?? null,
 };

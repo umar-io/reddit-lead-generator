@@ -1,5 +1,5 @@
 /**
- * marz-lead-radar — shared types.
+ * lead-radar — shared types.
  * Read-only research tool. Never auto-posts, DMs, or comments.
  */
 

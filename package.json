@@ -1,9 +1,10 @@
 {
   "name": "led-gen",
   "version": "1.0.0",
-  "description": "",
+  "description": "Config-driven, read-only Reddit + Hacker News lead discovery with AI qualification and pluggable outputs (Slack, Discord, webhook, JSON).",
   "main": "index.js",
   "scripts": {
+    "config:init": "node -e \"const fs=require('fs');if(fs.existsSync('lead-radar.config.json')){console.log('lead-radar.config.json already exists')}else{fs.copyFileSync('lead-radar.config.example.json','lead-radar.config.json');console.log('Created lead-radar.config.json — edit it for your niche')}\"",
     "test:lead": "tsx src/pipeline.ts",
     "pipeline:live": "tsx src/pipeline.ts --live",
     "pipeline:dry": "tsx src/pipeline.ts --live --dry-run --limit=5",
